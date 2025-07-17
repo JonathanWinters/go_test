@@ -12,3 +12,7 @@ func NewUserID() (id UserID) {
 	id.UUID = uuid.New()
 	return
 }
+
+func UserIDFromString(id string) UserID {
+	return UserID{uuid.FromString(id)}
+}

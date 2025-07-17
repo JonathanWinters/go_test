@@ -19,3 +19,7 @@ func New() (id UUID) {
 func (id UUID) IsNil() bool {
 	return id.UUID == google.Nil
 }
+
+func FromString(id string) UUID {
+	return UUID{google.MustParse(id)}
+}

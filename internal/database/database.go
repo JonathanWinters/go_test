@@ -9,10 +9,17 @@ import (
 	_ "github.com/lib/pq"
 )
 
+func ConnectDB(connStr string) *sql.DB {
+	db, err := sql.Open("postgres", connStr)
+	util.CheckNil(err)
+	CheckPing(err, db)
+	return db
+}
+
 func CreateTables(connStr string) {
 	db, err := sql.Open("postgres", connStr)
 
-	CheckNil(err)
+	util.CheckNil(err)
 	CheckPing(err, db)
 
 	CreateLevelTable(db)
@@ -44,16 +51,10 @@ func PingDB(connStr string) {
 
 	db, err := sql.Open("postgres", connStr)
 
-	CheckNil(err)
+	util.CheckNil(err)
 	CheckPing(err, db)
 
 	defer db.Close()
-}
-
-func CheckNil(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func CheckPing(err error, db *sql.DB) {

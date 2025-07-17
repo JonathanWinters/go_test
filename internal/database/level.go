@@ -5,6 +5,7 @@ import (
 
 	"github.com/JonathanWinters/go_test/internal/data"
 	"github.com/JonathanWinters/go_test/internal/definitions"
+	"github.com/JonathanWinters/go_test/internal/util"
 )
 
 type Level struct {
@@ -31,7 +32,7 @@ func CreateLevelTable(db *sql.DB) {
 
 	_, err := db.Exec(query)
 
-	CheckNil(err)
+	util.CheckNil(err)
 }
 
 func InsertLevel(db *sql.DB, level Level) int {
@@ -40,7 +41,7 @@ func InsertLevel(db *sql.DB, level Level) int {
 
 	var pk int
 	err := db.QueryRow(query, level.Map, level.OriginalPosition, level.PlayerHitPoints).Scan(&pk)
-	CheckNil(err)
+	util.CheckNil(err)
 	return pk
 }
 
