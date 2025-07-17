@@ -23,7 +23,8 @@ Use the following mapping:
 
 An example Level JSON might look like this:
 ```
-[[1,1,1,1,0,1,1,1],
+[
+[1,1,1,1,0,1,1,1],
 [1,0,0,0,0,0,0,1],
 [1,0,1,1,1,3,1,1],
 [1,0,0,0,1,0,2,1],
@@ -31,7 +32,8 @@ An example Level JSON might look like this:
 [1,0,0,0,1,0,0,1],
 [1,0,1,1,1,0,1,1],
 [1,0,0,4,0,0,0,1],
-[1,1,1,1,1,1,1,1]]
+[1,1,1,1,1,1,1,1]
+]
 ```
 
 ### Part 2: Validation & Testing

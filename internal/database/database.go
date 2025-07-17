@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/JonathanWinters/go_test/internal/data/dummydata"
+	"github.com/JonathanWinters/go_test/internal/util"
 	_ "github.com/lib/pq"
 )
 
@@ -14,6 +16,11 @@ func CreateTables(connStr string) {
 	CheckPing(err, db)
 
 	CreateLevelTable(db)
+
+	ogPosition := util.FindIndex2DArray(dummydata.Map, 4)
+
+	dummyLevel := Level{dummydata.LevelID, dummydata.Map, ogPosition, dummydata.PlayerHitPoints}
+	InsertLevel(db, dummyLevel)
 }
 
 // schema
@@ -25,24 +32,6 @@ func CreateTables(connStr string) {
 		ID
 		Map: number[x][y]
 */
-
-func CreateLevelTable(db *sql.DB) {
-	/*
-		- ID
-		- Map
-		- PlayerHitPoints
-	*/
-	query := `CREATE TABLE IF NOT EXISTS level (
-		id SERIAL PRIMARY KEY,
-		map TEXT NOT NULL
-		playerhitpoints
-		created timestamp DEFAULT NOW()
-	)`
-
-	_, err := db.Exec(query)
-
-	CheckNil(err)
-}
 
 func CreatePlayerTable() {
 	/*

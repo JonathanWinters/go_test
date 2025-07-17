@@ -1,8 +1,14 @@
 package dummydata
 
-const UserID = "dummyuser"
+import (
+	"github.com/JonathanWinters/go_test/internal/data"
+	"github.com/JonathanWinters/go_test/internal/definitions"
+)
 
-var Map = [][]uint{
+var UserID definitions.UserID = definitions.NewUserID()
+var LevelID definitions.LevelID = definitions.NewLevelID()
+
+var Map = data.Map{
 	{1, 1, 1, 1, 0, 1, 1, 1},
 	{1, 0, 0, 0, 0, 0, 0, 1},
 	{1, 0, 1, 1, 1, 3, 1, 1},
@@ -13,3 +19,5 @@ var Map = [][]uint{
 	{1, 0, 0, 4, 0, 0, 0, 1},
 	{1, 1, 1, 1, 1, 1, 1, 1},
 }
+
+const PlayerHitPoints = 4

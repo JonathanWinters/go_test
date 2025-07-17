@@ -1,12 +1,16 @@
 package data
 
 const (
-	OPEN_TILE                int = 0
-	WALL                     int = 1
-	PIT_TRAP                 int = 2
-	ARROW_TRAP               int = 3
-	PLAYER_STARTING_POSITION int = 4
+	OPEN_TILE                uint = 0
+	WALL                     uint = 1
+	PIT_TRAP                 uint = 2
+	ARROW_TRAP               uint = 3
+	PLAYER_STARTING_POSITION uint = 4
 )
 
 type Row []uint
 type Map []Row
+type Positon struct {
+	X int
+	Y int
+}
