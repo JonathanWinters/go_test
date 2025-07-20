@@ -6,7 +6,7 @@ import (
 	"github.com/JonathanWinters/go_test/internal/data"
 )
 
-func FindIndex2DArray(matrix []data.Row, targetValue uint) data.Positon {
+func FindIndex2DArray(matrix [][]int, targetValue int) data.Positon {
 
 	found := false
 	rowIndex := -1
