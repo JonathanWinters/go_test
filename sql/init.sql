@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS "level"(id SERIAL PRIMARY KEY,levelid TEXT NOT NULL,map bytea NOT NULL,originalposition bytea NOT NULL,playerhitpoints INT,created timestamp DEFAULT NOW());

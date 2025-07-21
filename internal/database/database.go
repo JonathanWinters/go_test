@@ -9,25 +9,26 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func ConnectDB(connStr string) *sql.DB {
-	db, err := sql.Open("postgres", connStr)
-	util.CheckNil(err)
-	CheckPing(err, db)
-	return db
+var DB *sql.DB
+
+func ConnectDB(connStr string) error {
+	DB, err := sql.Open("postgres", connStr)
+	// util.CheckNil(err)
+	if err != nil {
+		return err
+	}
+	CheckPing(err, DB)
+	return nil
 }
 
 func CreateTables(connStr string) {
-	db, err := sql.Open("postgres", connStr)
 
-	util.CheckNil(err)
-	CheckPing(err, db)
-
-	CreateLevelTable(db)
+	CreateLevelTable()
 
 	ogPosition := util.FindIndex2DArray(dummydata.Map, 4)
 
 	dummyLevel := Level{dummydata.LevelID, dummydata.Map, ogPosition, dummydata.PlayerHitPoints}
-	InsertLevel(db, dummyLevel)
+	InsertLevel(dummyLevel)
 }
 
 // schema
@@ -62,6 +63,7 @@ func CheckPing(err error, db *sql.DB) {
 	var checkErr = err
 
 	if checkErr = db.Ping(); checkErr != nil {
+		log.Printf("Error in PINGING DB")
 		log.Fatal(err)
 	}
 }

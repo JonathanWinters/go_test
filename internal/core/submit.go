@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"github.com/JonathanWinters/go_test/internal/data"
+	"github.com/JonathanWinters/go_test/internal/database"
 	"github.com/JonathanWinters/go_test/internal/definitions"
+	"github.com/JonathanWinters/go_test/internal/util"
 )
 
 type WriteError struct {
@@ -15,67 +17,114 @@ type WriteError struct {
 	UserId      definitions.UserID
 }
 
-func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) { //(submitResponse SubmitResponse, err error)
+type ValidatationError struct {
+	Error string
+}
 
-	if !ValidateMapSubmission(submitRequest.Level) {
+func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) SubmitResponse {
+
+	validationError, valid := ValidateMapSubmission(submitRequest.Level)
+	if !valid {
 		// return what went wrong
 		// fmt.Fprintf(writer, "Validity:, %s!\n Invalid")
 		Error := WriteError{
-			Error:       "Shit is fucked mate",
+			Error:       validationError.Error,
 			ResultLevel: submitRequest.Level,
 			UserId:      submitRequest.UserID,
 		}
 
+		emptyMap := [][]int{{}}
+		errorLevelID := definitions.NewLevelID()
+
+		submitResponse := SubmitResponse{
+			Error:      "Validation Error",
+			PrimaryKey: 0,
+			LevelID:    errorLevelID,
+			Map:        emptyMap,
+		}
+
 		rawError, err := json.Marshal(Error)
 		if err != nil {
-			return
+			return submitResponse
 		}
 
 		fmt.Fprintf(writer, "%s", rawError)
-		return
+		return submitResponse
 	}
 
-	rawResult, err := json.Marshal(submitRequest)
-	if err != nil {
-		return
+	levelID := definitions.NewLevelID()
+	levelMap := submitRequest.Level
+	originalPosition := util.FindIndex2DArray(levelMap, 4)
+
+	levelSubmission := database.Level{
+		ID:               levelID,
+		Map:              levelMap,
+		OriginalPosition: originalPosition,
+		PlayerHitPoints:  4,
 	}
 
-	fmt.Fprintf(writer, "%s", rawResult)
-	// fmt.Fprintf(writer, "Validity:, %s!\n VALID")
+	pk := database.InsertLevel(levelSubmission)
+
+	submitResponse := SubmitResponse{
+		PrimaryKey: pk,
+		LevelID:    levelID,
+		Map:        levelMap,
+	}
+	return submitResponse
 }
 
 // 1. Maps must be retangular
 // 2. Maps may not be large than 100 in any dimenion
 // 3. Map spaces may not use values other the number 0, 1, 2, 3, or 4.
-func ValidateMapSubmission(matrix data.Map) bool {
+func ValidateMapSubmission(matrix data.Map) (validateError ValidatationError, valid bool) {
 
 	firstRowLen := len(matrix[0])
 	colLen := len(matrix)
 
-	if ValidateDimensions(colLen) {
-		return false
+	if !ValidateDimensions(colLen) {
+		valid = false
+		validateError = ValidatationError{
+			Error: "Dimensions Error: colLen",
+		}
+		return
 	}
 
 	for r, row := range matrix {
 		if !ValidateRectangle(firstRowLen, row) {
 			GetObfuscatedError(RECTANGULAR)
-			return false
+			valid = false
+			validateError = ValidatationError{
+				Error: "Rectangle Error",
+			}
+			return
 		}
 
 		rowLen := len(matrix[r])
 		if !ValidateDimensions(rowLen) {
-			return false
+			valid = false
+			validateError = ValidatationError{
+				Error: "Dimensions Error: rowLen",
+			}
+			return
 		}
 		// Iterate through columns in each row
 		for _, value := range row {
 
 			if !ValidateMapValues(value) {
 				GetObfuscatedError(VALUES)
-				return false
+				valid = false
+				validateError = ValidatationError{
+					Error: "Map Values Error",
+				}
+				return
 			}
 		}
 	}
-	return true
+	valid = true
+	validateError = ValidatationError{
+		Error: "N/A",
+	}
+	return
 }
 
 func ValidateRectangle(firstRowLen int, row []int) bool {

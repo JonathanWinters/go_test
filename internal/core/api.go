@@ -18,5 +18,8 @@ type SubmitRequest struct {
 }
 
 type SubmitResponse struct {
-	LevelID definitions.LevelID
+	Error      string
+	PrimaryKey int
+	LevelID    definitions.LevelID
+	Map        data.Map
 }

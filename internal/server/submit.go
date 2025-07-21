@@ -69,7 +69,7 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 		// is an open issue regarding this at
 		// https://github.com/golang/go/issues/25956.
 		case errors.Is(err, io.ErrUnexpectedEOF):
-			msg := fmt.Sprintf("Request body contains badly-formed JSON")
+			msg := "Request body contains badly-formed JSON"
 			http.Error(w, msg, http.StatusBadRequest)
 
 		// Catch any type errors, like trying to assign a string in the
@@ -134,5 +134,12 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 		Level:       responseObj.Level,
 	}
 
-	core.HandleSubmit(w, submitRequest)
+	submitResponse := core.HandleSubmit(w, submitRequest)
+
+	rawResult, err := json.Marshal(submitResponse)
+	if err != nil {
+		return
+	}
+
+	fmt.Fprintf(w, "%s", rawResult)
 }

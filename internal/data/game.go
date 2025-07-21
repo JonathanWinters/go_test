@@ -14,3 +14,5 @@ type Positon struct {
 	X int
 	Y int
 }
+
+const DBConnectionString = "postgres://postgres:secret@localhost:5432/postgres?sslmode=disable"
