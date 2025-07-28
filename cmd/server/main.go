@@ -11,7 +11,12 @@ import (
 
 func main() {
 
-	database.ConnectDB(data.DBConnectionString)
+	connectErr := database.ConnectDB(data.DBConnectionString)
+
+	if connectErr != nil {
+		log.Printf("Err in Connecting to DB")
+		return
+	}
 
 	createErr := database.CreateLevelTable()
 	if createErr != nil {
