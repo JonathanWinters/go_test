@@ -10,11 +10,11 @@ mkdir -p $FOLDER
 # MOVE_DOWN=3
 
 PRIMARY_KEY=1
-MOVE=2
+# MOVE=1
 
 BODY=$(cat << EOM
 {"primarykey":$PRIMARY_KEY, 
-"move":$MOVE
+"move":$1
 }
 EOM
 )

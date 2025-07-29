@@ -17,6 +17,8 @@ type MoveRequestBody struct {
 	Move       int
 }
 
+var moveRequestQueue = []core.MoveRequest{}
+
 func HandleMove(w http.ResponseWriter, r *http.Request) {
 
 	// If the Content-Type header is present, check that it has the value
@@ -108,16 +110,21 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err != nil {
-		log.Fatalf("Error converting string to int: %v", p)
-	}
-
 	moveRequest := core.MoveRequest{
 		PrimaryKey: p.PrimaryKey,
 		Move:       p.Move,
 	}
 
-	moveResponse := core.HandleMove(w, moveRequest)
+	// Queue Up Requests, then process
+
+	moveRequestQueue = enqueue(moveRequestQueue, moveRequest)
+
+	var moveResponse core.MoveResponse
+
+	for len(moveRequestQueue) != 0 {
+		moveResponse = core.HandleMove(w, moveRequestQueue[0])
+		moveRequestQueue = dequeue(moveRequestQueue)
+	}
 
 	rawResult, err := json.Marshal(moveResponse)
 
@@ -126,4 +133,16 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "%s", rawResult)
+}
+
+func enqueue(queue []core.MoveRequest, element core.MoveRequest) []core.MoveRequest {
+	queue = append(queue, element) // Simply append to enqueue.
+	fmt.Println("Enqueued:", element)
+	return queue
+}
+
+func dequeue(queue []core.MoveRequest) []core.MoveRequest {
+	element := queue[0] // The first element is the one to be dequeued.
+	fmt.Println("Dequeued:", element)
+	return queue[1:] // Slice off the element once it is dequeued.
 }
