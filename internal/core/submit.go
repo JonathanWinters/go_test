@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/JonathanWinters/go_test/internal/data"
@@ -41,6 +42,7 @@ func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) Submi
 			PrimaryKey: 0,
 			LevelID:    errorLevelID,
 			Map:        emptyMap,
+			Position:   data.Positon{X: 0, Y: 0},
 		}
 
 		rawError, err := json.Marshal(Error)
@@ -54,21 +56,26 @@ func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) Submi
 
 	levelID := definitions.NewLevelID()
 	levelMap := submitRequest.Level
-	originalPosition := util.FindIndex2DArray(levelMap, 4)
+	Position := util.FindIndex2DArray(levelMap, 4)
 
 	levelSubmission := database.Level{
-		ID:               levelID,
-		Map:              levelMap,
-		OriginalPosition: originalPosition,
-		PlayerHitPoints:  4,
+		ID:              levelID,
+		Map:             levelMap,
+		Position:        Position,
+		PlayerHitPoints: 4,
 	}
 
-	pk := database.InsertLevel(levelSubmission)
+	pk, err := database.InsertLevel(levelSubmission)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	submitResponse := SubmitResponse{
 		PrimaryKey: pk,
 		LevelID:    levelID,
 		Map:        levelMap,
+		Position:   Position,
 	}
 	return submitResponse
 }
@@ -138,9 +145,13 @@ func ValidateDimensions(length int) bool {
 func ValidateMapValues(value int) bool {
 	switch value {
 	case data.OPEN_TILE:
+		fallthrough
 	case data.WALL:
+		fallthrough
 	case data.PIT_TRAP:
+		fallthrough
 	case data.ARROW_TRAP:
+		fallthrough
 	case data.PLAYER_STARTING_POSITION:
 		return true
 	default:

@@ -27,7 +27,7 @@ func FindIndex2DArray(matrix [][]int, targetValue int) data.Positon {
 		}
 	}
 
-	pos := data.Positon{X: rowIndex, Y: colIndex}
+	pos := data.Positon{X: colIndex, Y: rowIndex}
 
 	return pos
 }

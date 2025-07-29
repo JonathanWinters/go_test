@@ -9,16 +9,52 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
+type db struct {
+	db *sql.DB
+}
+
+type LevelRow struct {
+	Id  int
+	Map []byte
+}
+
+var DockerDb db
 
 func ConnectDB(connStr string) error {
-	DB, err := sql.Open("postgres", connStr)
-	// util.CheckNil(err)
+	pgDB, err := sql.Open("postgres", connStr)
+
+	DockerDb.db = pgDB
+
 	if err != nil {
+		log.Printf("Error in sql.Open DB")
 		return err
 	}
-	CheckPing(err, DB)
+
+	checkErr := DockerDb.db.Ping()
+
+	// log.Printf("%s", DockerDb)
+	if checkErr != nil {
+		log.Printf("Error in PINGING DB")
+		log.Fatal(err)
+		return checkErr
+	}
+
 	return nil
+}
+
+func UpdateLevelHPAndPositionByPrimaryKey(pk int, hp int, pos []byte) error {
+
+	sqlQuery := `UPDATE "level" 
+				SET position = $1, 
+					playerhitpoints = $2 
+				WHERE id = $3`
+
+	_, err := DockerDb.db.Exec(sqlQuery, pos, hp, pk)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	return err
 }
 
 func CreateTables(connStr string) {
@@ -31,38 +67,53 @@ func CreateTables(connStr string) {
 	InsertLevel(dummyLevel)
 }
 
-// schema
-/*
-	User
-		ID
-		Levels: Array of Levels, each with an ID
-	Level
-		ID
-		Map: number[x][y]
-*/
+func GetMapByPrimaryKey(pk int) (levelMap []byte, err error) {
 
-func CreatePlayerTable() {
-	/*
-		- ID
-		- Maps
-	*/
+	sqlQuery := `SELECT map FROM "level" WHERE id = $1`
+
+	err = DockerDb.db.QueryRow(sqlQuery, pk).Scan(&levelMap)
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	return
 }
 
-func PingDB(connStr string) {
+func GetPlayerHitPointsByPrimaryKey(pk int) (hitpoints int, err error) {
 
-	db, err := sql.Open("postgres", connStr)
+	sqlQuery := `SELECT playerhitpoints FROM "level" WHERE id = $1`
 
-	util.CheckNil(err)
-	CheckPing(err, db)
+	err = DockerDb.db.QueryRow(sqlQuery, pk).Scan(&hitpoints)
 
-	defer db.Close()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	return
 }
 
-func CheckPing(err error, db *sql.DB) {
+func GetPositionByPrimaryKey(pk int) (pos []byte, err error) {
+
+	sqlQuery := `SELECT position FROM "level" WHERE id = $1`
+
+	err = DockerDb.db.QueryRow(sqlQuery, pk).Scan(&pos)
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	return
+}
+
+func CheckPing(err error) {
 
 	var checkErr = err
 
-	if checkErr = db.Ping(); checkErr != nil {
+	if checkErr = DockerDb.db.Ping(); checkErr != nil {
 		log.Printf("Error in PINGING DB")
 		log.Fatal(err)
 	}

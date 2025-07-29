@@ -22,4 +22,19 @@ type SubmitResponse struct {
 	PrimaryKey int
 	LevelID    definitions.LevelID
 	Map        data.Map
+	Position   data.Positon
+}
+
+type MoveRequest struct {
+	PrimaryKey int
+	Move       int
+}
+
+type MoveResponse struct {
+	Error           string
+	Result          string
+	Map             data.Map
+	PlayerHitPoints int
+	Position        data.Positon
+	LatestMap       data.Map
 }

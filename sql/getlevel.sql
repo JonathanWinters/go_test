@@ -1,0 +1,1 @@
+SELECT map FROM "level" WHERE id = ?

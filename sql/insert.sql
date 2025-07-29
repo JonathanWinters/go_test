@@ -1,0 +1,1 @@
+INSERT INTO level (levelid, map, position, playerhitpoints) VALUES ($1, $2, $3, $4) RETURNING id

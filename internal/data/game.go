@@ -9,6 +9,13 @@ const (
 	MAX_DIMENSION            int = 100
 )
 
+const (
+	MOVE_LEFT  int = 0
+	MOVE_UP    int = 1
+	MOVE_RIGHT int = 2
+	MOVE_DOWN  int = 3
+)
+
 type Map [][]int
 type Positon struct {
 	X int

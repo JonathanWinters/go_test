@@ -8,15 +8,14 @@ import (
 
 	"github.com/JonathanWinters/go_test/internal/data"
 	"github.com/JonathanWinters/go_test/internal/definitions"
-	"github.com/JonathanWinters/go_test/internal/util"
 	_ "github.com/lib/pq"
 )
 
 type Level struct {
-	ID               definitions.LevelID
-	Map              data.Map
-	OriginalPosition data.Positon
-	PlayerHitPoints  int
+	ID              definitions.LevelID
+	Map             data.Map
+	Position        data.Positon
+	PlayerHitPoints int
 }
 
 /* --------------------------------- */
@@ -26,22 +25,13 @@ func CreateLevelTable() error {
 
 	c, ioErr := os.ReadFile(path)
 	if ioErr != nil {
-		// handle error.
-		// log.Fatal(ioErr)
 		log.Printf("ioErr \n")
 		return ioErr
 	}
 	sqlQuery := string(c)
-	log.Printf("%s", sqlQuery)
 
-	// DB, openErr := sql.Open("postgres", data.DBConnectionString)
-	// // util.CheckNil(err)
-	// if openErr != nil {
-	// 	return openErr
-	// }
-	// CheckPing(openErr, DB)
-
-	_, err := DB.Exec(sqlQuery)
+	// log.Printf("%s", DockerDb)
+	_, err := DockerDb.db.Exec(sqlQuery)
 	if err != nil {
 		log.Printf("err at DB.Exec \n")
 		return err
@@ -50,32 +40,28 @@ func CreateLevelTable() error {
 	return nil
 }
 
-func InsertLevel(level Level) int {
-	query := `INSERT INTO level (levelid, map, originalposition, playerhitpoints)
-		VALUES ($1, $2, $3, $4) RETURNING id`
+func InsertLevel(level Level) (pk int, err error) {
+	path := filepath.Join("..", "..", "sql", "insert.sql")
 
-	var pk int
+	c, ioErr := os.ReadFile(path)
+	if ioErr != nil {
+		log.Printf("ioErr \n")
+		err = ioErr
+		pk = -1
+		return
+	}
+	sqlQuery := string(c)
 
 	jsonMap, _ := json.Marshal(level.Map)
-	jsonPos, _ := json.Marshal(level.OriginalPosition)
+	jsonPos, _ := json.Marshal(level.Position)
 
-	// DB, openErr := sql.Open("postgres", data.DBConnectionString)
-	// // util.CheckNil(err)
-	// if openErr != nil {
-	// 	return -1
-	// }
-	// CheckPing(openErr, DB)
+	err = DockerDb.db.QueryRow(sqlQuery, level.ID, jsonMap, jsonPos, level.PlayerHitPoints).Scan(&pk)
 
-	err := DB.QueryRow(query, level.ID, jsonMap, jsonPos, level.PlayerHitPoints).Scan(&pk)
-	util.CheckNil(err)
-
-	return pk
+	return
 }
 
-func GetLevelByID() {
+func UpdateUserLevel(pk int, move int) (err string) {
 
-}
-
-func UpdateUserLevel() {
-
+	err = ""
+	return
 }
