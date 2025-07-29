@@ -1,6 +1,13 @@
 # GO and Postgres Test
 
-## Overview:
+
+## Use Instructions:
+1. Create a docker instance of https://hub.docker.com/_/postgres and name it "pg-test" with a password of "secret"
+2. cd into `cmd/server`, type `go run main.go` and press enter
+3. cd into `scripts/endpoints` and type `./submit.sh`, give it execute commands if needed using `chmod +x`, then press enter
+4. type `./move.sh {your move [0, 1, 2, 3, 4]}` in order to move your player. Look at the move.json file inside the tmp folder that gets created to see updates.
+
+## Test Overview:
 For this test you will be writing a small web server in Golang and using Postgres as a database.
 
 For each part, please be sure to explain your solution, the choices you’ve made, and note how long it took you to complete. Also, send me your final code and database schema in an email with your write-up along with all instructions necessary to build and run your program.
