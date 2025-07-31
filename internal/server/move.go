@@ -17,6 +17,7 @@ import (
 type MoveRequestBody struct {
 	PrimaryKey int
 	Move       int
+	GodMode    bool
 }
 
 var moveRequestQueue = []core.MoveRequest{}
@@ -53,6 +54,7 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 
 	var p MoveRequestBody
 	err := dec.Decode(&p)
+
 	if err != nil {
 		var syntaxError *json.SyntaxError
 		var unmarshalTypeError *json.UnmarshalTypeError
@@ -119,7 +121,6 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Queue Up Requests, then process
-
 	moveRequestQueue = enqueue(moveRequestQueue, moveRequest)
 
 	var moveResponse core.MoveResponse
