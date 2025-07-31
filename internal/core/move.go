@@ -9,7 +9,7 @@ import (
 	"github.com/JonathanWinters/go_test/internal/util"
 )
 
-func HandleMove(writer http.ResponseWriter, submitRequest MoveRequest) MoveResponse {
+func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveResponse {
 
 	moveResponse := MoveResponse{
 		Error:           "",
@@ -20,20 +20,20 @@ func HandleMove(writer http.ResponseWriter, submitRequest MoveRequest) MoveRespo
 		LatestMap:       [][]int{{}},
 	}
 
-	err, valid := ValidateMove(submitRequest.Move)
+	err, valid := ValidateMove(moveRequest.Move)
 
 	if !valid {
 		moveResponse.Error = err
 		return moveResponse
 	}
 
-	marhsalledLevel, dbMapErr := database.GetMapByPrimaryKey(submitRequest.PrimaryKey)
+	marhsalledLevel, dbMapErr := database.GetMapByPrimaryKey(moveRequest.PrimaryKey)
 	if dbMapErr != nil {
 		moveResponse.Error = dbMapErr.Error()
 		return moveResponse
 	}
 
-	dbPlayerHitPoints, dbHPErr := database.GetPlayerHitPointsByPrimaryKey(submitRequest.PrimaryKey)
+	dbPlayerHitPoints, dbHPErr := database.GetPlayerHitPointsByPrimaryKey(moveRequest.PrimaryKey)
 	if dbHPErr != nil {
 		moveResponse.Error = dbHPErr.Error()
 		return moveResponse
@@ -49,7 +49,7 @@ func HandleMove(writer http.ResponseWriter, submitRequest MoveRequest) MoveRespo
 
 	// Find Current Position
 	// currentPos := util.FindIndex2DArray(level, 4)
-	dbPosition, dbPosErr := database.GetPositionByPrimaryKey(submitRequest.PrimaryKey)
+	dbPosition, dbPosErr := database.GetPositionByPrimaryKey(moveRequest.PrimaryKey)
 	if dbPosErr != nil {
 		moveResponse.Error = dbPosErr.Error()
 		return moveResponse
@@ -82,7 +82,7 @@ func HandleMove(writer http.ResponseWriter, submitRequest MoveRequest) MoveRespo
 
 	newPos := currentPos
 	// Move that current position
-	switch submitRequest.Move {
+	switch moveRequest.Move {
 	case data.MOVE_LEFT:
 		newPos.X--
 	case data.MOVE_UP:
@@ -95,8 +95,8 @@ func HandleMove(writer http.ResponseWriter, submitRequest MoveRequest) MoveRespo
 
 	//Check if new position exists within the Map
 	//Check if new position is going to result in a move, player HP going down
-	allowed, trapHit, result := NextMoveAllowed(newPos, level)
-	if allowed {
+	allowed, trapHit, ooo, result := NextMoveAllowed(newPos, level)
+	if allowed || (!ooo && moveRequest.GodMode) {
 		moveResponse.Position = newPos
 		moveResponse.Result = "Move Successful"
 
@@ -113,7 +113,7 @@ func HandleMove(writer http.ResponseWriter, submitRequest MoveRequest) MoveRespo
 
 		marshalledPosition, _ := json.Marshal(moveResponse.Position)
 
-		updateErr := database.UpdateLevelHPAndPositionByPrimaryKey(submitRequest.PrimaryKey, moveResponse.PlayerHitPoints, marshalledPosition)
+		updateErr := database.UpdateLevelHPAndPositionByPrimaryKey(moveRequest.PrimaryKey, moveResponse.PlayerHitPoints, marshalledPosition)
 
 		if updateErr != nil {
 			moveResponse.Error = "Database Update Failure, " + updateErr.Error()
@@ -129,7 +129,7 @@ func HandleMove(writer http.ResponseWriter, submitRequest MoveRequest) MoveRespo
 	return moveResponse
 }
 
-func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit bool, result string) {
+func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit bool, ooo bool, result string) {
 	maxXIndex := len(level) - 1
 	maxYIndex := len(level[0]) - 1
 
@@ -139,7 +139,7 @@ func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit
 	if x > maxXIndex || x < 0 {
 		allowed = false
 		trapHit = false
-
+		ooo = true
 		result = "X Out of Bounds"
 		return
 	}
@@ -147,7 +147,7 @@ func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit
 	if y > maxYIndex || y < 0 {
 		allowed = false
 		trapHit = false
-
+		ooo = true
 		result = "Y Out of Bounds"
 		return
 	}
@@ -158,17 +158,19 @@ func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit
 	case data.PIT_TRAP, data.ARROW_TRAP:
 		allowed = true
 		trapHit = true
+		ooo = false
 		return
 	case data.WALL:
 		allowed = false
 		trapHit = false
+		ooo = false
 		result = "Wall Hit"
 		return
 	}
 
 	allowed = true
 	trapHit = false
-
+	ooo = false
 	return
 }
 

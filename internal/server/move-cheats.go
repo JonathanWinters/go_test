@@ -1,4 +1,4 @@
-//go:build !cheats
+//go:build cheats
 
 package server
 
@@ -17,6 +17,7 @@ import (
 type MoveRequestBody struct {
 	PrimaryKey int
 	Move       int
+	GodMode    bool
 }
 
 var moveRequestQueue = []core.MoveRequest{}
@@ -115,11 +116,10 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	moveRequest := core.MoveRequest{
 		PrimaryKey: p.PrimaryKey,
 		Move:       p.Move,
-		GodMode:    false,
+		GodMode:    p.GodMode,
 	}
 
 	// Queue Up Requests, then process
-
 	moveRequestQueue = enqueue(moveRequestQueue, moveRequest)
 
 	var moveResponse core.MoveResponse

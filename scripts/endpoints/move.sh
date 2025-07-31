@@ -15,6 +15,7 @@ PRIMARY_KEY=1
 BODY=$(cat << EOM
 {"primarykey":$PRIMARY_KEY, 
 "move":$1
+"godmode":$2
 }
 EOM
 )

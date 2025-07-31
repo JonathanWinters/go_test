@@ -28,6 +28,7 @@ type SubmitResponse struct {
 type MoveRequest struct {
 	PrimaryKey int
 	Move       int
+	GodMode    bool
 }
 
 type MoveResponse struct {
