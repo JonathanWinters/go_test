@@ -14,7 +14,6 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 	moveResponse := MoveResponse{
 		Error:           "",
 		Result:          "",
-		Map:             [][]int{{}}, // TODO: Replace OBJ
 		PlayerHitPoints: 0,
 		Position:        data.Positon{X: 0, Y: 0},
 		LatestMap:       [][]int{{}},
@@ -64,7 +63,6 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 		return moveResponse
 	}
 
-	moveResponse.Map = level
 	moveResponse.PlayerHitPoints = dbPlayerHitPoints
 
 	moveResponse.Position = data.Positon{
@@ -73,7 +71,7 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 	}
 
 	copiedMap := make([][]int, len(level))
-	for i := range moveResponse.Map {
+	for i := range level {
 		copiedMap[i] = make([]int, len(level[i]))
 		copy(copiedMap[i], level[i]) // Copy elements of inner slice
 	}
@@ -100,7 +98,7 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 		moveResponse.Position = newPos
 		moveResponse.Result = "Move Successful"
 
-		if trapHit {
+		if trapHit && !moveRequest.GodMode {
 			moveResponse.PlayerHitPoints--
 			moveResponse.Result = "Move Successful, Hit Trap"
 
@@ -127,6 +125,14 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 	moveResponse.LatestMap[ogPos.Y][ogPos.X] = data.OPEN_TILE
 
 	return moveResponse
+	// testmoveResponse := MoveResponse{
+	// 	Error:           "",
+	// 	Result:          "",
+	// 	PlayerHitPoints: 0,
+	// 	Position:        data.Positon{X: 0, Y: 0},
+	// 	LatestMap:       [][]int{{}},
+	// }
+	// return testmoveResponse
 }
 
 func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit bool, ooo bool, result string) {

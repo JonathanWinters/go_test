@@ -18,13 +18,13 @@ func main() {
 		return
 	}
 
-	createErr := database.CreateLevelTable()
-	if createErr != nil {
-		log.Printf("Table was NOT created")
-		log.Fatal(createErr)
-		return
-	}
-	log.Printf("Table WAS created")
+	// createErr := database.CreateLevelTable()
+	// if createErr != nil {
+	// 	log.Printf("Table was NOT created")
+	// 	log.Fatal(createErr)
+	// 	return
+	// }
+	// log.Printf("Table WAS created")
 
 	server.SetHandlers()
 	server.StartServer()

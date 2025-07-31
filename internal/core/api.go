@@ -34,7 +34,6 @@ type MoveRequest struct {
 type MoveResponse struct {
 	Error           string
 	Result          string
-	Map             data.Map
 	PlayerHitPoints int
 	Position        data.Positon
 	LatestMap       data.Map

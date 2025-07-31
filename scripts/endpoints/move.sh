@@ -11,10 +11,11 @@ mkdir -p $FOLDER
 
 PRIMARY_KEY=1
 # MOVE=1
+GODMODE=true
 
 BODY=$(cat << EOM
 {"primarykey":$PRIMARY_KEY, 
-"move":$1
+"move":$1,
 "godmode":$2
 }
 EOM
