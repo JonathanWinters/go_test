@@ -6,11 +6,6 @@ import (
 	request "github.com/JonathanWinters/go_test/internal/util/types"
 )
 
-type User struct {
-	UserID         definitions.UserID
-	CurrentLevelID *definitions.LevelID
-}
-
 type SubmitRequest struct {
 	RequestType request.HttpMethod
 	UserID      definitions.UserID

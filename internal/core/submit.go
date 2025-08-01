@@ -157,5 +157,4 @@ func ValidateMapValues(value int) bool {
 	default:
 		return false
 	}
-	return true
 }

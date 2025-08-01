@@ -18,10 +18,18 @@ type Level struct {
 	PlayerHitPoints int
 }
 
+const sqlFolderPath = "./Projects/go_test/sql"
+
 /* --------------------------------- */
 func CreateLevelTable() error {
 
-	path := filepath.Join("..", "..", "sql", "init.sql")
+	dirname, dirErr := os.UserHomeDir()
+	if dirErr != nil {
+		log.Fatal(dirErr)
+	}
+	log.Printf("%s Home Directory:", dirname)
+
+	path := filepath.Join(dirname, sqlFolderPath, "init.sql")
 
 	c, ioErr := os.ReadFile(path)
 	if ioErr != nil {
@@ -41,7 +49,14 @@ func CreateLevelTable() error {
 }
 
 func InsertLevel(level Level) (pk int, err error) {
-	path := filepath.Join("..", "..", "sql", "insert.sql")
+
+	dirname, dirErr := os.UserHomeDir()
+	if dirErr != nil {
+		log.Fatal(dirErr)
+	}
+	log.Printf("%s Home Directory:", dirname)
+
+	path := filepath.Join(dirname, sqlFolderPath, "insert.sql")
 
 	c, ioErr := os.ReadFile(path)
 	if ioErr != nil {
