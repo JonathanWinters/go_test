@@ -13,6 +13,7 @@ func NewLevelID() (id LevelID) {
 	return
 }
 
+// !INFO EFC: unused funcs
 // create new one
 func NewLevelIDPtr() *LevelID {
 	return NewLevelID().AsPtr()

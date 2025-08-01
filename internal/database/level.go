@@ -18,10 +18,18 @@ type Level struct {
 	PlayerHitPoints int
 }
 
+const sqlFolderPath = "./Projects/go_test/sql"
+
 /* --------------------------------- */
 func CreateLevelTable() error {
 
-	path := filepath.Join("..", "..", "sql", "init.sql")
+	dirname, dirErr := os.UserHomeDir()
+	if dirErr != nil {
+		log.Fatal(dirErr)
+	}
+	log.Printf("%s Home Directory:", dirname)
+
+	path := filepath.Join(dirname, sqlFolderPath, "init.sql")
 
 	c, ioErr := os.ReadFile(path)
 	if ioErr != nil {
@@ -41,16 +49,28 @@ func CreateLevelTable() error {
 }
 
 func InsertLevel(level Level) (pk int, err error) {
-	path := filepath.Join("..", "..", "sql", "insert.sql")
 
-	c, ioErr := os.ReadFile(path)
-	if ioErr != nil {
-		log.Printf("ioErr \n")
-		err = ioErr
-		pk = -1
-		return
+	//!TODO EFC: example of := for arg-use
+	var dirname string
+	dirname, err = os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
 	}
-	sqlQuery := string(c)
+	log.Printf("%s Home Directory:", dirname)
+
+	// path := filepath.Join(dirname, sqlFolderPath, "insert.sql")
+
+	// //!INFO EFC: another scenario where just err can be used
+	// c, ioErr := os.ReadFile(path)
+	// if ioErr != nil {
+	// 	log.Printf("ioErr \n")
+	// 	err = ioErr
+	// 	pk = -1
+	// 	return
+	// }
+	// sqlQuery := string(c)
+
+	sqlQuery := "INSERT INTO level (levelid, map, position, playerhitpoints) VALUES ($1, $2, $3, $4) RETURNING id;"
 
 	jsonMap, _ := json.Marshal(level.Map)
 	jsonPos, _ := json.Marshal(level.Position)

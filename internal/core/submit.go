@@ -22,8 +22,10 @@ type ValidatationError struct {
 	Error string
 }
 
+// !INFO EFC: we like to give just about all return types a named value, this removes need for init'ing and helps readability
 func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) SubmitResponse {
 
+	//!INFO EFC: no need for separate valid var, simply check if validationError != nil
 	validationError, valid := ValidateMapSubmission(submitRequest.Level)
 	if !valid {
 		// return what went wrong
@@ -134,6 +136,7 @@ func ValidateMapSubmission(matrix data.Map) (validateError ValidatationError, va
 	return
 }
 
+// !INFO EFC: appreciate all these checks being broke out into simple, readable funcs
 func ValidateRectangle(firstRowLen int, row []int) bool {
 	return len(row) == firstRowLen
 }
@@ -157,5 +160,26 @@ func ValidateMapValues(value int) bool {
 	default:
 		return false
 	}
-	return true
+}
+
+// !INFO EFC: simplified multi-case statement
+func ValidateMapValues2(value int) bool {
+	switch value {
+	case data.OPEN_TILE, data.WALL, data.PIT_TRAP, data.ARROW_TRAP:
+		fallthrough
+	case data.PLAYER_STARTING_POSITION:
+		return true
+	default:
+		return false
+	}
+}
+
+// !INFO EFC: even further simplified multi-case statement
+func ValidateMapValues3(value int) bool {
+	switch value {
+	case data.PLAYER_STARTING_POSITION:
+		return true
+	default:
+		return false
+	}
 }

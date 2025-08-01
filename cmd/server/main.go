@@ -6,11 +6,15 @@ import (
 	"github.com/JonathanWinters/go_test/internal/data"
 	"github.com/JonathanWinters/go_test/internal/database"
 	"github.com/JonathanWinters/go_test/internal/server"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" //!INFO EFC: this annoying quirk creates package-level variables and executes the init() function of that package
 )
 
 func main() {
 
+	// blah := timing.Now()
+	// log.Print(blah)
+
+	// //!INFO EFC: err vars
 	connectErr := database.ConnectDB(data.DBConnectionString)
 
 	if connectErr != nil {
@@ -18,13 +22,14 @@ func main() {
 		return
 	}
 
-	createErr := database.CreateLevelTable()
-	if createErr != nil {
-		log.Printf("Table was NOT created")
-		log.Fatal(createErr)
-		return
-	}
-	log.Printf("Table WAS created")
+	//!INFO EFC: db creation handled via docker/scripts
+	// createErr := database.CreateLevelTable()
+	// if createErr != nil {
+	// 	log.Printf("Table was NOT created")
+	// 	log.Fatal(createErr)
+	// 	return
+	// }
+	// log.Printf("Table WAS created")
 
 	server.SetHandlers()
 	server.StartServer()
