@@ -21,7 +21,6 @@ func main() {
 		log.Printf("Err in Connecting to DB")
 		return
 	}
-
 	//!INFO EFC: db creation handled via docker/scripts
 	// createErr := database.CreateLevelTable()
 	// if createErr != nil {

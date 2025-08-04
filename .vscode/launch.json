@@ -11,7 +11,17 @@
             "mode": "debug",
 			"trace": "verbose",
 			"cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/cmd/server/main.go"
+            "program": "${workspaceFolder}/cmd/server/main.go",
+        },
+        {
+            "name": "debug-cheats",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+			"trace": "verbose",
+			"cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/cmd/server/main.go",
+            "buildFlags": "-tags=cheats",
         }
     ]
 }

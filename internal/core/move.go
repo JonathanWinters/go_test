@@ -135,7 +135,6 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 	// }
 	// return testmoveResponse
 }
-
 // !INFO EFC: private funcs (not used outside this package) should always be lowercase (golang auto-enforces this way)
 func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit bool, ooo bool, result string) {
 	maxXIndex := len(level) - 1
