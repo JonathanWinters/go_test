@@ -2,9 +2,9 @@ package database
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/JonathanWinters/go_test/internal/data"
 	"github.com/JonathanWinters/go_test/internal/definitions"
@@ -18,27 +18,35 @@ type Level struct {
 	PlayerHitPoints int
 }
 
-const sqlFolderPath = "./Projects/go_test/sql"
+// const sqlFolderPath = "./Projects/go_test/sql"
 
 /* --------------------------------- */
 func CreateLevelTable() error {
 
-	dirname, dirErr := os.UserHomeDir()
-	if dirErr != nil {
-		log.Fatal(dirErr)
+	// load JSON from disk
+	file, fileErr := os.Open("init.sql")
+	if fileErr != nil {
+		return fileErr
 	}
-	log.Printf("%s Home Directory:", dirname)
+	defer file.Close()
 
-	path := filepath.Join(dirname, sqlFolderPath, "init.sql")
+	// Create a byte slice to store the read data
+	buffer := make([]byte, 1024) // Read in chunks of 1024 bytes
 
-	c, ioErr := os.ReadFile(path)
-	if ioErr != nil {
-		log.Printf("ioErr \n")
-		return ioErr
+	for {
+		// Read from the file into the buffer
+		_, err := file.Read(buffer)
+		if err == io.EOF {
+			// End of file reached
+			break
+		}
+		if err != nil {
+			log.Fatalf("Error reading file: %v", err)
+		}
 	}
-	sqlQuery := string(c)
 
-	// log.Printf("%s", DockerDb)
+	sqlQuery := string(buffer)
+
 	_, err := DockerDb.db.Exec(sqlQuery)
 	if err != nil {
 		log.Printf("err at DB.Exec \n")
@@ -50,33 +58,41 @@ func CreateLevelTable() error {
 
 func InsertLevel(level Level) (pk int, err error) {
 
-	dirname, dirErr := os.UserHomeDir()
-	if dirErr != nil {
-		log.Fatal(dirErr)
-	}
-	log.Printf("%s Home Directory:", dirname)
+	pk = -1
+	// load JSON from disk
+	homeDir, _ := os.UserHomeDir()
+	file, err := os.Open(homeDir + "/Projects/go_test/sql/insert.sql")
 
-	path := filepath.Join(dirname, sqlFolderPath, "insert.sql")
-
-	c, ioErr := os.ReadFile(path)
-	if ioErr != nil {
-		log.Printf("ioErr \n")
-		err = ioErr
+	log.Printf("%s", homeDir)
+	if err != nil {
 		pk = -1
 		return
 	}
-	sqlQuery := string(c)
+	defer file.Close()
+
+	// Create a byte slice to store the read data
+	buffer := make([]byte, 1024) // Read in chunks of 1024 bytes
+
+	for {
+		// Read from the file into the buffer
+		_, err := file.Read(buffer)
+		if err == io.EOF {
+			// End of file reached
+			break
+		}
+		if err != nil {
+			log.Fatalf("Error reading file: %v", err)
+		}
+	}
+
+	sqlQuery := string(buffer)
+
+	log.Printf("%s", sqlQuery)
 
 	jsonMap, _ := json.Marshal(level.Map)
 	jsonPos, _ := json.Marshal(level.Position)
 
 	err = DockerDb.db.QueryRow(sqlQuery, level.ID, jsonMap, jsonPos, level.PlayerHitPoints).Scan(&pk)
 
-	return
-}
-
-func UpdateUserLevel(pk int, move int) (err string) {
-
-	err = ""
 	return
 }
