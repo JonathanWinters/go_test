@@ -18,7 +18,7 @@ type Level struct {
 	PlayerHitPoints int
 }
 
-// const sqlFolderPath = "./Projects/go_test/sql"
+const sqlFolderPath = "./Projects/go_test/sql"
 
 /* --------------------------------- */
 func CreateLevelTable() error {

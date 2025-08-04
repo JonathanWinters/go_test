@@ -1,0 +1,14 @@
+services:
+  db:
+    build:
+      context: ..
+      dockerfile: docker/db.dockerfile
+    image: pgs.jfrog.io/pgs-docker-images/db:${BRANCH}
+    env_file: db.env
+    volumes:
+    - db-data:/var/lib/postgresql/data
+    ports:
+      - 5434:5434
+    command: -p 5434
+volumes:
+  db-data:

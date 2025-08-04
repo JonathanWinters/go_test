@@ -24,6 +24,7 @@ var moveRequestQueue = []core.MoveRequest{}
 
 func HandleMove(w http.ResponseWriter, r *http.Request) {
 
+	// !INFO EFC: all this somewhat complicated marshalling/demarshalling is luckily taken care of us by our RP package :D
 	// If the Content-Type header is present, check that it has the value
 	// application/json. Note that we parse and normalize the header to remove
 	// any additional parameters (like charset or boundary information) and normalize
@@ -121,6 +122,7 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Queue Up Requests, then process
+	// !INFO EFC: for a proper queue and/or multiplayer, we utilize locking in redis (redis???) and/or mutexs
 	moveRequestQueue = enqueue(moveRequestQueue, moveRequest)
 
 	var moveResponse core.MoveResponse

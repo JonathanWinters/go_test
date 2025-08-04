@@ -22,6 +22,7 @@ type MoveRequestBody struct {
 
 var moveRequestQueue = []core.MoveRequest{}
 
+// !INFO EFC: for build flag code, try to isolate only the meaningful differences, reduce dupe code
 func HandleMove(w http.ResponseWriter, r *http.Request) {
 
 	// If the Content-Type header is present, check that it has the value

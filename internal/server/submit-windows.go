@@ -143,5 +143,6 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// !INFO EFC: result should be returned as a response
 	fmt.Fprintf(w, "%s", rawResult)
 }

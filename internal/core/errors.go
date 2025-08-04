@@ -2,6 +2,7 @@ package core
 
 type Error int
 
+// !INFO EFC: good stuff!
 const (
 	RECTANGULAR Error = iota
 	DIMENSIONS

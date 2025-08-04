@@ -1,5 +1,6 @@
 package data
 
+// !INFO EFC: I prefer to be explicit, but golang does let you exclude types after defining the first
 const (
 	OPEN_TILE                int = 0
 	WALL                     int = 1
@@ -22,4 +23,4 @@ type Positon struct {
 	Y int
 }
 
-const DBConnectionString = "postgres://postgres:secret@localhost:5432/postgres?sslmode=disable"
+const DBConnectionString = "postgres://postgres:secret@localhost:5434/pg-test?sslmode=disable"

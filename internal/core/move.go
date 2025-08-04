@@ -93,6 +93,7 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 
 	//Check if new position exists within the Map
 	//Check if new position is going to result in a move, player HP going down
+	//!INFO EFC: ideally this is where the cheat logic would exist
 	allowed, trapHit, ooo, result := NextMoveAllowed(newPos, level)
 	if allowed || (!ooo && moveRequest.GodMode) {
 		moveResponse.Position = newPos
@@ -134,7 +135,7 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 	// }
 	// return testmoveResponse
 }
-
+// !INFO EFC: private funcs (not used outside this package) should always be lowercase (golang auto-enforces this way)
 func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit bool, ooo bool, result string) {
 	maxXIndex := len(level) - 1
 	maxYIndex := len(level[0]) - 1
@@ -181,9 +182,12 @@ func NextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit
 }
 
 func ValidateMove(move int) (err string, valid bool) {
+	//!INFO EFC: no need to pre-define when it's a return value (golang automagically does this using default value for the datatype)
+	//!INFO EFC: caveat: types that default to pointers will be nil
 	err = ""
 	valid = true
 
+	//!INFO EFC: multi-case switch statements, return instead of break (we love short-circuiting in golang)
 	switch move {
 	case data.MOVE_LEFT:
 		break

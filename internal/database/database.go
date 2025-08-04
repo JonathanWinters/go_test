@@ -23,6 +23,7 @@ var DockerDb db
 func ConnectDB(connStr string) error {
 	pgDB, err := sql.Open("postgres", connStr)
 
+	// !INFO EFC: typically we always want to inspect the error before assigning values returned (this scenario is ok since the db is nillable)
 	DockerDb.db = pgDB
 
 	if err != nil {
@@ -30,6 +31,9 @@ func ConnectDB(connStr string) error {
 		return err
 	}
 
+	// !INFO EFC: use defers to gracefully close objects if any error occurred (prevent memory leaks)
+	// !INFO EFC: we can't do it here because it will close when this func returns
+	// defer DockerDb.db.Close()
 	checkErr := DockerDb.db.Ping()
 
 	// log.Printf("%s", DockerDb)
@@ -42,6 +46,7 @@ func ConnectDB(connStr string) error {
 	return nil
 }
 
+// !INFO EFC: in our world, the pkey is usually the roundid or userid, which is included in client requests
 func UpdateLevelHPAndPositionByPrimaryKey(pk int, hp int, pos []byte) error {
 
 	sqlQuery := `UPDATE "level" 
@@ -59,11 +64,14 @@ func UpdateLevelHPAndPositionByPrimaryKey(pk int, hp int, pos []byte) error {
 
 func CreateTables(connStr string) {
 
+	//!INFO EFC: the ability to ignore return values in golang also has the pitfall of simply forgetting to check return values like here (error)
 	CreateLevelTable()
 
 	ogPosition := util.FindIndex2DArray(dummydata.Map, 4)
 
 	dummyLevel := Level{dummydata.LevelID, dummydata.Map, ogPosition, dummydata.PlayerHitPoints}
+
+	//!INFO EFC: same here
 	InsertLevel(dummyLevel)
 }
 
@@ -111,8 +119,10 @@ func GetPositionByPrimaryKey(pk int) (pos []byte, err error) {
 
 func CheckPing(err error) {
 
+	//!INFO EFC: super rare to ever need to define error vars as anything other than `err`
 	var checkErr = err
 
+	//!INFO EFC: valid short-cut, I hate this but you will find it scattered throughout our code-base
 	if checkErr = DockerDb.db.Ping(); checkErr != nil {
 		log.Printf("Error in PINGING DB")
 		log.Fatal(err)

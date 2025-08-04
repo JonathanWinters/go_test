@@ -6,6 +6,14 @@ import (
 	request "github.com/JonathanWinters/go_test/internal/util/types"
 )
 
+// !INFO EFC: struct tags are pieces of metadata attached to the fields of a struct.
+// !INFO EFC: they provide instructions or additional information to other Go code or libraries that process the struct
+// !INFO EFC: use cases: serialization/deserialization, required fields, empty fields
+type User struct {
+	UserID         definitions.UserID
+	CurrentLevelID *definitions.LevelID
+}
+
 type SubmitRequest struct {
 	RequestType request.HttpMethod
 	UserID      definitions.UserID
