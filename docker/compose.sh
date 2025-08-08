@@ -14,14 +14,14 @@ export BRANCH=dev
 
 #if no arguments, default to basic dependencies
 if [ $# -eq 0 ]; then
-    docker compose -f docker/db-docker-compose.yml up
+    docker compose -f db-docker-compose.yml up
 else
     case $1 in
         all)
-            docker compose -f docker/db-docker-compose.yml up --build
+            docker compose -f db-docker-compose.yml up --build
             ;;
         all-detach)
-            docker compose -f -f docker/db-docker-compose.yml up --detach --build
+            docker compose -f db-docker-compose.yml up --detach --build
             ;;
         *)
             printf 'No match for "%s"\n' "$1"

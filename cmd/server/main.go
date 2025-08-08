@@ -11,25 +11,15 @@ import (
 
 func main() {
 
-	// blah := timing.Now()
-	// log.Print(blah)
-
-	// //!INFO EFC: err vars
-	connectErr := database.ConnectDB(data.DBConnectionString)
-
-	if connectErr != nil {
+	//!FIXED
+	//!INFO EFC: err vars
+	err := database.ConnectDB(data.DBConnectionString)
+	if err != nil {
 		log.Printf("Err in Connecting to DB")
 		return
 	}
+	//!FIXED
 	//!INFO EFC: db creation handled via docker/scripts
-	// createErr := database.CreateLevelTable()
-	// if createErr != nil {
-	// 	log.Printf("Table was NOT created")
-	// 	log.Fatal(createErr)
-	// 	return
-	// }
-	// log.Printf("Table WAS created")
-
 	server.SetHandlers()
-	server.StartServer()
+	server.StartServers()
 }

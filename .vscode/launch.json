@@ -9,6 +9,8 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
+            "showLog": true, // Shows Delve logs in the Debug Console
+            "logOutput": "rpc", // Logs RPC messages between VS Code and Delve (requires showLog: true)
 			"trace": "verbose",
 			"cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/cmd/server/main.go",

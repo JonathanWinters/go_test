@@ -13,7 +13,6 @@ import (
 
 	"github.com/JonathanWinters/go_test/internal/core"
 	"github.com/JonathanWinters/go_test/internal/definitions"
-	"github.com/JonathanWinters/go_test/internal/util/types"
 )
 
 type RequestBody struct {
@@ -33,6 +32,7 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 		mediaType := strings.ToLower(strings.TrimSpace(strings.Split(ct, ";")[0]))
 		if mediaType != "application/json" {
 			msg := "Content-Type header is not application/json"
+			log.Println(msg)
 			http.Error(w, msg, http.StatusUnsupportedMediaType)
 			return
 		}
@@ -64,6 +64,7 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 		// easier for the client to fix.
 		case errors.As(err, &syntaxError):
 			msg := fmt.Sprintf("Request body contains badly-formed JSON (at position %d)", syntaxError.Offset)
+			log.Println(msg)
 			http.Error(w, msg, http.StatusBadRequest)
 
 		// In some circumstances Decode() may also return an
@@ -72,6 +73,7 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 		// https://github.com/golang/go/issues/25956.
 		case errors.Is(err, io.ErrUnexpectedEOF):
 			msg := "Request body contains badly-formed JSON"
+			log.Println(msg)
 			http.Error(w, msg, http.StatusBadRequest)
 
 		// Catch any type errors, like trying to assign a string in the
@@ -80,6 +82,7 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 		// message to make it easier for the client to fix.
 		case errors.As(err, &unmarshalTypeError):
 			msg := fmt.Sprintf("Request body contains an invalid value for the %q field (at position %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
+			log.Println(msg)
 			http.Error(w, msg, http.StatusBadRequest)
 
 		// Catch the error caused by extra unexpected fields in the request
@@ -90,23 +93,26 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 		case strings.HasPrefix(err.Error(), "json: unknown field "):
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
 			msg := fmt.Sprintf("Request body contains unknown field %s", fieldName)
+			log.Println(msg)
 			http.Error(w, msg, http.StatusBadRequest)
 
 		// An io.EOF error is returned by Decode() if the request body is
 		// empty.
 		case errors.Is(err, io.EOF):
 			msg := "Request body must not be empty"
+			log.Println(msg)
 			http.Error(w, msg, http.StatusBadRequest)
 
 		// Catch the error caused by the request body being too large.
 		case errors.As(err, &maxBytesError):
 			msg := fmt.Sprintf("Request body must not be larger than %d bytes", maxBytesError.Limit)
+			log.Println(msg)
 			http.Error(w, msg, http.StatusRequestEntityTooLarge)
 
 		// Otherwise default to logging the error and sending a 500 Internal
 		// Server Error response.
 		default:
-			log.Print(err.Error())
+			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
 		return
@@ -123,6 +129,8 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
+	log.Println("Submit Decode Successful")
+
 	responseObj := RequestBody{
 		UserId: p.UserId,
 		Level:  p.Level,
@@ -131,9 +139,8 @@ func HandleSubmit(w http.ResponseWriter, r *http.Request) {
 	userid := definitions.UserIDFromString(responseObj.UserId)
 
 	submitRequest := core.SubmitRequest{
-		RequestType: types.PUT,
-		UserID:      userid,
-		Level:       responseObj.Level,
+		UserID: userid,
+		Level:  responseObj.Level,
 	}
 
 	submitResponse := core.HandleSubmit(w, submitRequest)

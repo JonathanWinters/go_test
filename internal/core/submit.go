@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,25 +14,37 @@ import (
 )
 
 type WriteError struct {
-	Error       string
+	Message     string
 	ResultLevel [][]int
 	UserId      definitions.UserID
 }
 
-type ValidatationError struct {
-	Error string
+func (e *WriteError) Error() string {
+	return fmt.Sprintf("Error %s: %d - %s", e.Message, e.ResultLevel, e.UserId)
 }
 
-// !INFO EFC: we like to give just about all return types a named value, this removes need for init'ing and helps readability
-func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) SubmitResponse {
+type ValidatationError struct {
+	Message string
+}
 
+func (e *ValidatationError) Error() string {
+	return fmt.Sprintf("Error: %s", e.Message)
+}
+
+// !FIXED
+// !INFO EFC: we like to give just about all return types a named value, this removes need for init'ing and helps readability
+func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) (submitResponse SubmitResponse) {
+
+	//!FIXED
 	//!INFO EFC: no need for separate valid var, simply check if validationError != nil
-	validationError, valid := ValidateMapSubmission(submitRequest.Level)
-	if !valid {
+	err := ValidateMapSubmission(submitRequest.Level)
+	if err != nil {
 		// return what went wrong
 		// fmt.Fprintf(writer, "Validity:, %s!\n Invalid")
+		var ve *ValidatationError
+		errors.As(err, &ve)
 		Error := WriteError{
-			Error:       validationError.Error,
+			Message:     ve.Message,
 			ResultLevel: submitRequest.Level,
 			UserId:      submitRequest.UserID,
 		}
@@ -73,7 +86,7 @@ func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) Submi
 		log.Fatal(err)
 	}
 
-	submitResponse := SubmitResponse{
+	submitResponse = SubmitResponse{
 		PrimaryKey: pk,
 		LevelID:    levelID,
 		Map:        levelMap,
@@ -85,15 +98,14 @@ func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) Submi
 // 1. Maps must be retangular
 // 2. Maps may not be large than 100 in any dimenion
 // 3. Map spaces may not use values other the number 0, 1, 2, 3, or 4.
-func ValidateMapSubmission(matrix data.Map) (validateError ValidatationError, valid bool) {
+func ValidateMapSubmission(matrix data.Map) (err error) {
 
 	firstRowLen := len(matrix[0])
 	colLen := len(matrix)
 
 	if !ValidateDimensions(colLen) {
-		valid = false
-		validateError = ValidatationError{
-			Error: "Dimensions Error: colLen",
+		err = &ValidatationError{
+			Message: "Dimensions Error: colLen",
 		}
 		return
 	}
@@ -101,18 +113,16 @@ func ValidateMapSubmission(matrix data.Map) (validateError ValidatationError, va
 	for r, row := range matrix {
 		if !ValidateRectangle(firstRowLen, row) {
 			GetObfuscatedError(RECTANGULAR)
-			valid = false
-			validateError = ValidatationError{
-				Error: "Rectangle Error",
+			err = &ValidatationError{
+				Message: "Rectangle Error",
 			}
 			return
 		}
 
 		rowLen := len(matrix[r])
 		if !ValidateDimensions(rowLen) {
-			valid = false
-			validateError = ValidatationError{
-				Error: "Dimensions Error: rowLen",
+			err = &ValidatationError{
+				Message: "Dimensions Error: rowLen",
 			}
 			return
 		}
@@ -121,21 +131,17 @@ func ValidateMapSubmission(matrix data.Map) (validateError ValidatationError, va
 
 			if !ValidateMapValues(value) {
 				GetObfuscatedError(VALUES)
-				valid = false
-				validateError = ValidatationError{
-					Error: "Map Values Error",
+				err = &ValidatationError{
+					Message: "Map Values Error",
 				}
 				return
 			}
 		}
 	}
-	valid = true
-	validateError = ValidatationError{
-		Error: "N/A",
-	}
 	return
 }
 
+// !NOTED
 // !INFO EFC: appreciate all these checks being broke out into simple, readable funcs
 func ValidateRectangle(firstRowLen int, row []int) bool {
 	return len(row) == firstRowLen
@@ -147,37 +153,7 @@ func ValidateDimensions(length int) bool {
 
 func ValidateMapValues(value int) bool {
 	switch value {
-	case data.OPEN_TILE:
-		fallthrough
-	case data.WALL:
-		fallthrough
-	case data.PIT_TRAP:
-		fallthrough
-	case data.ARROW_TRAP:
-		fallthrough
-	case data.PLAYER_STARTING_POSITION:
-		return true
-	default:
-		return false
-	}
-}
-
-// !INFO EFC: simplified multi-case statement
-func ValidateMapValues2(value int) bool {
-	switch value {
-	case data.OPEN_TILE, data.WALL, data.PIT_TRAP, data.ARROW_TRAP:
-		fallthrough
-	case data.PLAYER_STARTING_POSITION:
-		return true
-	default:
-		return false
-	}
-}
-
-// !INFO EFC: even further simplified multi-case statement
-func ValidateMapValues3(value int) bool {
-	switch value {
-	case data.PLAYER_STARTING_POSITION:
+	case data.OPEN_TILE, data.WALL, data.PIT_TRAP, data.ARROW_TRAP, data.PLAYER_STARTING_POSITION:
 		return true
 	default:
 		return false

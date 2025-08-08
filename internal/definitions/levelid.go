@@ -13,24 +13,5 @@ func NewLevelID() (id LevelID) {
 	return
 }
 
+//!FIXED
 // !INFO EFC: unused funcs
-// create new one
-func NewLevelIDPtr() *LevelID {
-	return NewLevelID().AsPtr()
-}
-
-// return as a pointer or nil
-func (id LevelID) AsPtr() *LevelID {
-	if id.IsNil() {
-		return nil
-	}
-	return &id
-}
-
-// safely dereference
-func (ptr *LevelID) Self() (id LevelID) {
-	if ptr != nil {
-		id = *ptr
-	}
-	return
-}
