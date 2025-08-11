@@ -24,17 +24,10 @@ func ConnectDB(connStr string) (err error) {
 		log.Println("Error in sql.Open DB")
 		return err
 	}
-	//!FIXED
-	// !INFO EFC: typically we always want to inspect the error before assigning values returned (this scenario is ok since the db is nillable)
 	DockerDb.db = pgDB
 
-	//!FIXED
-	// !INFO EFC: use defers to gracefully close objects if any error occurred (prevent memory leaks)
-	// !INFO EFC: we can't do it here because it will close when this func returns
-	// defer DockerDb.db.Close()
 	err = DockerDb.db.Ping()
 
-	// log.Printf("%s", DockerDb)
 	if err != nil {
 		log.Println("Error in PINGING DB")
 		log.Fatal(err)

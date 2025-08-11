@@ -81,11 +81,8 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 		newPos.Y++
 	}
 
-	//Check if new position exists within the Map
-	//Check if new position is going to result in a move, player HP going down
-	//!INFO EFC: ideally this is where the cheat logic would exist
-	allowed, trapHit, ooo, result := nextMoveAllowed(newPos, level)
-	if allowed || (!ooo && moveRequest.GodMode) {
+	allowed, trapHit, oob, result := nextMoveAllowed(newPos, level)
+	if allowed || (!oob && moveRequest.GodMode) {
 		moveResponse.Position = newPos
 		moveResponse.Result = "Move Successful"
 
@@ -124,7 +121,7 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 	return moveResponse
 }
 
-func nextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit bool, ooo bool, result string) {
+func nextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit bool, oob bool, result string) {
 	maxXIndex := len(level) - 1
 	maxYIndex := len(level[0]) - 1
 
@@ -134,7 +131,7 @@ func nextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit
 	if x > maxXIndex || x < 0 {
 		allowed = false
 		trapHit = false
-		ooo = true
+		oob = true
 		result = "X Out of Bounds"
 		return
 	}
@@ -142,7 +139,7 @@ func nextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit
 	if y > maxYIndex || y < 0 {
 		allowed = false
 		trapHit = false
-		ooo = true
+		oob = true
 		result = "Y Out of Bounds"
 		return
 	}
@@ -153,19 +150,19 @@ func nextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit
 	case data.PIT_TRAP, data.ARROW_TRAP:
 		allowed = true
 		trapHit = true
-		ooo = false
+		oob = false
 		return
 	case data.WALL:
 		allowed = false
 		trapHit = false
-		ooo = false
+		oob = false
 		result = "Wall Hit"
 		return
 	}
 
 	allowed = true
 	trapHit = false
-	ooo = false
+	oob = false
 	return
 }
 

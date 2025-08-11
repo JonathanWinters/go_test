@@ -137,8 +137,6 @@ func ValidateMapSubmission(matrix data.Map) (err error) {
 	return
 }
 
-// !NOTED
-// !INFO EFC: appreciate all these checks being broke out into simple, readable funcs
 func ValidateRectangle(firstRowLen int, row []int) bool {
 	return len(row) == firstRowLen
 }

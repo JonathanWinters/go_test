@@ -5,10 +5,6 @@ import (
 	"github.com/JonathanWinters/go_test/internal/definitions"
 )
 
-// !FIXED
-// !INFO EFC: struct tags are pieces of metadata attached to the fields of a struct.
-// !INFO EFC: they provide instructions or additional information to other Go code or libraries that process the struct
-// !INFO EFC: use cases: serialization/deserialization, required fields, empty fields
 type SubmitRequest struct {
 	UserID definitions.UserID `json:"userid"`
 	Level  data.Map           `json:"level"`
