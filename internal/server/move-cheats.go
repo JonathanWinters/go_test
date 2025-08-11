@@ -1,4 +1,4 @@
-//go:build !cheats
+//go:build cheats
 
 package server
 
@@ -8,8 +8,6 @@ import (
 
 	"github.com/JonathanWinters/go_test/internal/core"
 )
-
-const CheatsAllowed = false
 
 var MoveRequestQueue = []core.MoveRequest{}
 
@@ -23,7 +21,7 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	moveRequest := core.MoveRequest{
 		PrimaryKey: mrb.PrimaryKey,
 		Move:       mrb.Move,
-		GodMode:    CheatsAllowed,
+		GodMode:    mrb.GodMode,
 	}
 
 	rawResult, err := ProcessMoveRequest(w, moveRequest)

@@ -1,5 +1,5 @@
 
-SERVER_URL=127.0.0.1:5442
+SERVER_URL=127.0.0.1:8080
 
 FOLDER=tmp
 mkdir -p $FOLDER
@@ -11,10 +11,12 @@ mkdir -p $FOLDER
 
 PRIMARY_KEY=1
 # MOVE=1
+GODMODE=true
 
 BODY=$(cat << EOM
 {"primarykey":$PRIMARY_KEY, 
-"move":$1
+"move":$1,
+"godmode":$2
 }
 EOM
 )

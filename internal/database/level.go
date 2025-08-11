@@ -3,8 +3,6 @@ package database
 import (
 	"encoding/json"
 	"log"
-	"os"
-	"path/filepath"
 
 	"github.com/JonathanWinters/go_test/internal/data"
 	"github.com/JonathanWinters/go_test/internal/definitions"
@@ -21,16 +19,9 @@ type Level struct {
 /* --------------------------------- */
 func CreateLevelTable() error {
 
-	path := filepath.Join("..", "..", "sql", "init.sql")
+	sqlQuery := `CREATE TABLE IF NOT EXISTS "level"(id SERIAL PRIMARY KEY,levelid TEXT NOT NULL,map bytea NOT NULL,position bytea NOT NULL,playerhitpoints INT,created timestamp DEFAULT NOW());
+`
 
-	c, ioErr := os.ReadFile(path)
-	if ioErr != nil {
-		log.Printf("ioErr \n")
-		return ioErr
-	}
-	sqlQuery := string(c)
-
-	// log.Printf("%s", DockerDb)
 	_, err := DockerDb.db.Exec(sqlQuery)
 	if err != nil {
 		log.Printf("err at DB.Exec \n")
@@ -41,27 +32,17 @@ func CreateLevelTable() error {
 }
 
 func InsertLevel(level Level) (pk int, err error) {
-	path := filepath.Join("..", "..", "sql", "insert.sql")
 
-	c, ioErr := os.ReadFile(path)
-	if ioErr != nil {
-		log.Printf("ioErr \n")
-		err = ioErr
-		pk = -1
-		return
-	}
-	sqlQuery := string(c)
+	pk = -1
+
+	sqlQuery := `INSERT INTO level (levelid, map, position, playerhitpoints) VALUES ($1, $2, $3, $4) RETURNING id`
+
+	log.Printf("%s", sqlQuery)
 
 	jsonMap, _ := json.Marshal(level.Map)
 	jsonPos, _ := json.Marshal(level.Position)
 
 	err = DockerDb.db.QueryRow(sqlQuery, level.ID, jsonMap, jsonPos, level.PlayerHitPoints).Scan(&pk)
 
-	return
-}
-
-func UpdateUserLevel(pk int, move int) (err string) {
-
-	err = ""
 	return
 }

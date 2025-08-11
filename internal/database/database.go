@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/JonathanWinters/go_test/internal/data/dummydata"
-	"github.com/JonathanWinters/go_test/internal/util"
 	_ "github.com/lib/pq"
 )
 
@@ -20,26 +18,23 @@ type LevelRow struct {
 
 var DockerDb db
 
-func ConnectDB(connStr string) error {
+func ConnectDB(connStr string) (err error) {
 	pgDB, err := sql.Open("postgres", connStr)
-
-	DockerDb.db = pgDB
-
 	if err != nil {
-		log.Printf("Error in sql.Open DB")
+		log.Println("Error in sql.Open DB")
 		return err
 	}
+	DockerDb.db = pgDB
 
-	checkErr := DockerDb.db.Ping()
+	err = DockerDb.db.Ping()
 
-	// log.Printf("%s", DockerDb)
-	if checkErr != nil {
-		log.Printf("Error in PINGING DB")
+	if err != nil {
+		log.Println("Error in PINGING DB")
 		log.Fatal(err)
-		return checkErr
+		return err
 	}
-
-	return nil
+	log.Println("Connected to DB")
+	return
 }
 
 func UpdateLevelHPAndPositionByPrimaryKey(pk int, hp int, pos []byte) error {
@@ -55,16 +50,6 @@ func UpdateLevelHPAndPositionByPrimaryKey(pk int, hp int, pos []byte) error {
 		log.Fatal(err)
 	}
 	return err
-}
-
-func CreateTables(connStr string) {
-
-	CreateLevelTable()
-
-	ogPosition := util.FindIndex2DArray(dummydata.Map, 4)
-
-	dummyLevel := Level{dummydata.LevelID, dummydata.Map, ogPosition, dummydata.PlayerHitPoints}
-	InsertLevel(dummyLevel)
 }
 
 func GetMapByPrimaryKey(pk int) (levelMap []byte, err error) {
@@ -107,14 +92,4 @@ func GetPositionByPrimaryKey(pk int) (pos []byte, err error) {
 	}
 
 	return
-}
-
-func CheckPing(err error) {
-
-	var checkErr = err
-
-	if checkErr = DockerDb.db.Ping(); checkErr != nil {
-		log.Printf("Error in PINGING DB")
-		log.Fatal(err)
-	}
 }

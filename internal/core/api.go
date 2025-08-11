@@ -3,38 +3,31 @@ package core
 import (
 	"github.com/JonathanWinters/go_test/internal/data"
 	"github.com/JonathanWinters/go_test/internal/definitions"
-	request "github.com/JonathanWinters/go_test/internal/util/types"
 )
 
-type User struct {
-	UserID         definitions.UserID
-	CurrentLevelID *definitions.LevelID
-}
-
 type SubmitRequest struct {
-	RequestType request.HttpMethod
-	UserID      definitions.UserID
-	Level       data.Map
+	UserID definitions.UserID `json:"userid"`
+	Level  data.Map           `json:"level"`
 }
 
 type SubmitResponse struct {
-	Error      string
-	PrimaryKey int
-	LevelID    definitions.LevelID
-	Map        data.Map
-	Position   data.Positon
+	Error      string              `json:"error"`
+	PrimaryKey int                 `json:"primarykey"`
+	LevelID    definitions.LevelID `json:"levelid"`
+	Map        data.Map            `json:"map"`
+	Position   data.Positon        `json:"position"`
 }
 
 type MoveRequest struct {
-	PrimaryKey int
-	Move       int
+	PrimaryKey int  `json:"primarykey"`
+	Move       int  `json:"move"`
+	GodMode    bool `json:"godmode"`
 }
 
 type MoveResponse struct {
-	Error           string
-	Result          string
-	Map             data.Map
-	PlayerHitPoints int
-	Position        data.Positon
-	LatestMap       data.Map
+	Error           string       `json:"error"`
+	Result          string       `json:"result"`
+	PlayerHitPoints int          `json:"playerhitpoints"`
+	Position        data.Positon `json:"position"`
+	LatestMap       data.Map     `json:"latestmap"`
 }
