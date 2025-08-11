@@ -31,12 +31,8 @@ func (e *ValidatationError) Error() string {
 	return fmt.Sprintf("Error: %s", e.Message)
 }
 
-// !FIXED
-// !INFO EFC: we like to give just about all return types a named value, this removes need for init'ing and helps readability
 func HandleSubmit(writer http.ResponseWriter, submitRequest SubmitRequest) (submitResponse SubmitResponse) {
 
-	//!FIXED
-	//!INFO EFC: no need for separate valid var, simply check if validationError != nil
 	err := ValidateMapSubmission(submitRequest.Level)
 	if err != nil {
 		// return what went wrong

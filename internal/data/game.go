@@ -1,7 +1,5 @@
 package data
 
-// !NOTED
-// !INFO EFC: I prefer to be explicit, but golang does let you exclude types after defining the first
 const (
 	OPEN_TILE                int = 0
 	WALL                     int = 1

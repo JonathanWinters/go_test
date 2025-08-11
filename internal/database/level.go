@@ -2,9 +2,7 @@ package database
 
 import (
 	"encoding/json"
-	"io"
 	"log"
-	"os"
 
 	"github.com/JonathanWinters/go_test/internal/data"
 	"github.com/JonathanWinters/go_test/internal/definitions"
@@ -18,34 +16,11 @@ type Level struct {
 	PlayerHitPoints int
 }
 
-// const sqlFolderPath = "./Projects/go_test/sql"
-
 /* --------------------------------- */
 func CreateLevelTable() error {
 
-	// load JSON from disk
-	file, fileErr := os.Open("init.sql")
-	if fileErr != nil {
-		return fileErr
-	}
-	defer file.Close()
-
-	// Create a byte slice to store the read data
-	buffer := make([]byte, 1024) // Read in chunks of 1024 bytes
-
-	for {
-		// Read from the file into the buffer
-		_, err := file.Read(buffer)
-		if err == io.EOF {
-			// End of file reached
-			break
-		}
-		if err != nil {
-			log.Fatalf("Error reading file: %v", err)
-		}
-	}
-
-	sqlQuery := string(buffer)
+	sqlQuery := `CREATE TABLE IF NOT EXISTS "level"(id SERIAL PRIMARY KEY,levelid TEXT NOT NULL,map bytea NOT NULL,position bytea NOT NULL,playerhitpoints INT,created timestamp DEFAULT NOW());
+`
 
 	_, err := DockerDb.db.Exec(sqlQuery)
 	if err != nil {
@@ -59,35 +34,6 @@ func CreateLevelTable() error {
 func InsertLevel(level Level) (pk int, err error) {
 
 	pk = -1
-	// load JSON from disk
-	/*
-		homeDir, _ := os.UserHomeDir()
-		file, err := os.Open(homeDir + "/Projects/go_test/sql/insert.sql")
-
-		log.Printf("%s", homeDir)
-		if err != nil {
-			pk = -1
-			return
-		}
-		defer file.Close()
-
-		// Create a byte slice to store the read data
-		buffer := make([]byte, 1024) // Read in chunks of 1024 bytes
-
-		for {
-			// Read from the file into the buffer
-			_, err := file.Read(buffer)
-			if err == io.EOF {
-				// End of file reached
-				break
-			}
-			if err != nil {
-				log.Fatalf("Error reading file: %v", err)
-			}
-		}
-
-		sqlQuery := string(buffer)
-	*/
 
 	sqlQuery := `INSERT INTO level (levelid, map, position, playerhitpoints) VALUES ($1, $2, $3, $4) RETURNING id`
 

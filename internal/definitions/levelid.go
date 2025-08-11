@@ -12,6 +12,3 @@ func NewLevelID() (id LevelID) {
 	id.UUID = uuid.New()
 	return
 }
-
-//!FIXED
-// !INFO EFC: unused funcs

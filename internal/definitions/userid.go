@@ -13,8 +13,6 @@ func NewUserID() (id UserID) {
 	return
 }
 
-// !FIXED
-// !INFO EFC: good scenario where naming the return var isn't REQUIRED (by us)
 func UserIDFromString(id string) (userid UserID) {
 	userid = UserID{uuid.FromString(id)}
 	return

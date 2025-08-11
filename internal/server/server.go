@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/JonathanWinters/go_test/internal/core"
+	"github.com/JonathanWinters/go_test/internal/definitions"
 	"github.com/JonathanWinters/go_test/internal/util"
 	"github.com/go-redis/redis/v9"
 )
@@ -17,6 +18,17 @@ import (
 const redisServerAddr = "localhost:6380"
 const LockKey = "lock_redis"
 const LockTimeout = 20 * time.Second
+
+type SubmitRequestBody struct {
+	UserId string
+	Level  [][]int
+}
+
+type MoveRequestBody struct {
+	PrimaryKey int
+	Move       int
+	GodMode    bool
+}
 
 type RedisEventType int
 
@@ -56,13 +68,6 @@ func StartRedisServer() {
 		Addr:     redisServerAddr,
 		Password: "",
 	})
-
-	// pubsubs := setRedisListeners()
-
-	// for i := 0; i < len(pubsubs); i++ {
-
-	// 	defer pubsubs[i].Close()
-	// }
 }
 
 func StartServers() {
@@ -83,50 +88,6 @@ func StartServers() {
 	fmt.Println("Application shutting down.")
 }
 
-func setRedisListener(ctx context.Context, eventType RedisEventType, cb Callback) (pubsub *redis.PubSub) {
-
-	pubsub = rc.client.PSubscribe(ctx, "__keyevent@0__:"+eventType.String())
-	// defer pubsub.Close()
-
-	// Channel to receive messages
-	ch := pubsub.Channel()
-
-	fmt.Println("Listening for Redis key expiration events...")
-
-	for msg := range ch {
-		fmt.Printf("Received message on channel %s: %s\n", msg.Channel, msg.Payload)
-		// The payload will be the name of the expired key
-		// You can then check if this key corresponds to an "unlocked" lock
-		if isLockKey(msg.Payload) { // Implement your logic to identify lock keys
-			fmt.Printf("Lock key '%s' expired (unlocked)\n", msg.Payload)
-			// Perform actions related to the unlocked event
-			cb(MoveRequestQueue)
-		}
-	}
-	return
-}
-
-// func setRedisListeners() (pubsubs []redis.PubSub) {
-// 	ctx := context.Background()
-
-// 	setRedisListener(ctx, EventExpired, DequeueMove)
-// 	setRedisListener(ctx, EventDel, DequeueMove)
-// 	return
-// }
-
-// func EnqueueMove(queue []core.MoveRequest, element core.MoveRequest) {
-// 	queue = append(queue, element) // Simply append to enqueue.
-// }
-
-// func DequeueMove(queue []core.MoveRequest) {
-// 	// Slice off the element once it is dequeued.
-// 	ReleaseLock(rc.client, LockKey)
-// 	slice := queue[1:]
-// 	if slice == nil {
-// 		return
-// 	}
-// }
-
 func AcquireLock(client *redis.Client, lockKey string, timeout time.Duration) (lockAcquired bool) {
 	ctx := context.Background()
 
@@ -145,15 +106,8 @@ func ReleaseLock(client *redis.Client, lockKey string) {
 	client.Del(ctx, lockKey)
 }
 
-func isLockKey(key string) bool {
-	// Example: Check if the key starts with a specific prefix for locks
-	return len(key) > 4 && key[:4] == "lock"
-}
-
 func ProcessMoveRequest(w http.ResponseWriter, moveRequest core.MoveRequest) (rawResult []byte, err error) {
-	// Queue Up Requests, then process
-	//!NOTED
-	// !INFO EFC: for a proper queue and/or multiplayer, we utilize locking in redis (redis???) and/or mutexs
+
 	lockAcquired := AcquireLock(rc.client, LockKey, LockTimeout)
 
 	var moveResponse core.MoveResponse
@@ -172,7 +126,37 @@ func ProcessMoveRequest(w http.ResponseWriter, moveRequest core.MoveRequest) (ra
 	return
 }
 
-func DecodeJson(w http.ResponseWriter, r *http.Request) (mrb MoveRequestBody, err error) {
+func ProcessSubmitRequest(w http.ResponseWriter, r *http.Request) (rawResult []byte, err error) {
+
+	srb, err := DecodeSubmitJson(w, r)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	responseObj := SubmitRequestBody{
+		UserId: srb.UserId,
+		Level:  srb.Level,
+	}
+
+	userid := definitions.UserIDFromString(responseObj.UserId)
+
+	submitRequest := core.SubmitRequest{
+		UserID: userid,
+		Level:  responseObj.Level,
+	}
+
+	submitResponse := core.HandleSubmit(w, submitRequest)
+
+	rawResult, err = json.Marshal(submitResponse)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	return
+}
+
+func DecodeMoveJson(w http.ResponseWriter, r *http.Request) (mrb MoveRequestBody, err error) {
 	notJson := util.HandleContentTypeError(w, r)
 	if notJson {
 		return
@@ -184,6 +168,25 @@ func DecodeJson(w http.ResponseWriter, r *http.Request) (mrb MoveRequestBody, er
 	dec.DisallowUnknownFields()
 
 	err = dec.Decode(&mrb)
+	if err != nil {
+		util.HandleDecodeError(w, err)
+		return
+	}
+	return
+}
+
+func DecodeSubmitJson(w http.ResponseWriter, r *http.Request) (srb SubmitRequestBody, err error) {
+	notJson := util.HandleContentTypeError(w, r)
+	if notJson {
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, util.MaxMB)
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	err = dec.Decode(&srb)
 	if err != nil {
 		util.HandleDecodeError(w, err)
 		return

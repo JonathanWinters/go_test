@@ -9,21 +9,13 @@ import (
 	"github.com/JonathanWinters/go_test/internal/core"
 )
 
-type MoveRequestBody struct {
-	PrimaryKey int
-	Move       int
-	GodMode    bool
-}
-
 const CheatsAllowed = false
 
 var MoveRequestQueue = []core.MoveRequest{}
 
 func HandleMove(w http.ResponseWriter, r *http.Request) {
 
-	//!FIXED
-	// !INFO EFC: all this somewhat complicated marshalling/demarshalling is luckily taken care of us by our RP package :D
-	mrb, err := DecodeJson(w, r)
+	mrb, err := DecodeMoveJson(w, r)
 	if err != nil {
 		return
 	}

@@ -21,52 +21,39 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 	}
 
 	err, invalid := invalidMove(moveRequest.Move)
-	moveResponse.Error = "BEFORE invalid Check"
 	if invalid {
 		moveResponse.Error = err
 		return moveResponse
 	}
-	moveResponse.Error = "AFTER invalid Check"
 	marhsalledLevel, dbMapErr := database.GetMapByPrimaryKey(moveRequest.PrimaryKey)
-	moveResponse.Error = "BEFORE dbMapErr Check"
 	if dbMapErr != nil {
 		moveResponse.Error = dbMapErr.Error()
 		return moveResponse
 	}
-	moveResponse.Error = "AFTER dbMapErr Check"
 	dbPlayerHitPoints, dbHPErr := database.GetPlayerHitPointsByPrimaryKey(moveRequest.PrimaryKey)
-	moveResponse.Error = "BEFORE dbHPErr Check"
 	if dbHPErr != nil {
 		moveResponse.Error = dbHPErr.Error()
 		return moveResponse
 	}
-	moveResponse.Error = "AFTER dbHPErr Check"
 	var level data.Map
 
 	unmarshallLevelErr := json.Unmarshal(marhsalledLevel, &level)
-	moveResponse.Error = "BEFORE unmarshallLevelErr Check"
 	if unmarshallLevelErr != nil {
 		moveResponse.Error = unmarshallLevelErr.Error()
 		return moveResponse
 	}
-	moveResponse.Error = "AFTER unmarshallLevelErr Check"
-	// Find Current Position
 	dbPosition, dbPosErr := database.GetPositionByPrimaryKey(moveRequest.PrimaryKey)
-	moveResponse.Error = "BEFORE dbPosErr Check"
 	if dbPosErr != nil {
 		moveResponse.Error = dbPosErr.Error()
 		return moveResponse
 	}
-	moveResponse.Error = "AFTER dbPosErr Check"
 	var currentPos data.Positon
 
 	unmarshallPosErr := json.Unmarshal(dbPosition, &currentPos)
-	moveResponse.Error = "BEFORE unmarshallPosErr Check"
 	if unmarshallPosErr != nil {
 		moveResponse.Error = unmarshallPosErr.Error()
 		return moveResponse
 	}
-	moveResponse.Error = "AFTER unmarshallPosErr Check"
 	moveResponse.PlayerHitPoints = dbPlayerHitPoints
 
 	moveResponse.Position = data.Positon{
@@ -79,7 +66,6 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 		copiedMap[i] = make([]int, len(level[i]))
 		copy(copiedMap[i], level[i]) // Copy elements of inner slice
 	}
-
 	moveResponse.LatestMap = copiedMap
 
 	newPos := currentPos
@@ -138,8 +124,6 @@ func HandleMove(writer http.ResponseWriter, moveRequest MoveRequest) MoveRespons
 	return moveResponse
 }
 
-// !FIXED
-// !INFO EFC: private funcs (not used outside this package) should always be lowercase (golang auto-enforces this way)
 func nextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit bool, ooo bool, result string) {
 	maxXIndex := len(level) - 1
 	maxYIndex := len(level[0]) - 1
@@ -186,12 +170,6 @@ func nextMoveAllowed(newPos data.Positon, level data.Map) (allowed bool, trapHit
 }
 
 func invalidMove(move int) (err string, invalid bool) {
-	//!FIXED
-	//!INFO EFC: no need to pre-define when it's a return value (golang automagically does this using default value for the datatype)
-	//!INFO EFC: caveat: types that default to pointers will be nil
-
-	//!FIXED
-	//!INFO EFC: multi-case switch statements, return instead of break (we love short-circuiting in golang)
 	switch move {
 	case data.MOVE_LEFT, data.MOVE_UP, data.MOVE_RIGHT, data.MOVE_DOWN:
 		err = "Move Value is NOT Invalid: " + fmt.Sprint(move)

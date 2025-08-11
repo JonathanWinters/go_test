@@ -44,7 +44,6 @@ func ConnectDB(connStr string) (err error) {
 	return
 }
 
-// !INFO EFC: in our world, the pkey is usually the roundid or userid, which is included in client requests
 func UpdateLevelHPAndPositionByPrimaryKey(pk int, hp int, pos []byte) error {
 
 	sqlQuery := `UPDATE "level" 
